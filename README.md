@@ -32,7 +32,7 @@ git clone https://github.com/seubank96/barcode-scanner-app.git
 cd barcode-scanner-app
 
 # Install Dependencies
- pip install -r requirements
+ pip install -r requirements.txt
 ```
 
 ## Run the Application
