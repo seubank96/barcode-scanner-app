@@ -1,0 +1,6 @@
+opencv-python
+pyzbar
+numpy
+pandas
+flask
+sqlite3
