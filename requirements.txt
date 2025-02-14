@@ -4,3 +4,4 @@ numpy
 pandas
 flask
 sqlite-database
+matplotlib
