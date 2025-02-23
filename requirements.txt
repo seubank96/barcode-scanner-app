@@ -3,4 +3,5 @@ pyzbar
 numpy
 pandas
 flask
-sqlite3
+sqlite-database
+matplotlib
