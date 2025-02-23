@@ -52,10 +52,6 @@ while running:
             cv2.polylines(img, [pts], True, (0, 255, 0), 3)
             cv2.putText(img, str(decoded_data), (rect_pts[0], rect_pts[1]), 
                         cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
-    
-    # cv2.putText(img, f"{decoded_data} ({code.type})", (x, y - 10),
-    #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2) 
-            # Extra code for debugging if necessary
 
     cv2.imshow("Video Stream", img)
     if cv2.waitKey(1) == ord("q"):
