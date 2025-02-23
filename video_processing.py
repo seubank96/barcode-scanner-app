@@ -21,14 +21,19 @@ else:
     print(f"Total frames in the video: {n_frames}")
 
     frame_idx = 0  # Start index for saving frames
+    count = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
+        
         if not ret:
             break  # If no frame is returned, stop processing
+        count += 1
+        #if count % 10 != 0:
+            #continue
 
         # Save every frame as an image file (every 10 frames)
-        frame_filename = os.path.join(output_folder, f"frame_{frame_idx:04d}.png")
+        frame_filename = os.path.join(output_folder, f"frame_{frame_idx:04d}.png") 
         if frame_idx % 10 == 0:
             grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             cv2.imwrite(frame_filename, grey)
