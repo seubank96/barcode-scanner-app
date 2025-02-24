@@ -90,5 +90,3 @@ else:
     cap.release()
     cv2.destroyAllWindows()
     print(f"Processing completed. Total barcode-detected frames: {barcode_detected_count}")
-
-
