@@ -32,29 +32,61 @@ def process_frame(frame):
     # Decode barcodes and QR codes
     decoded_objects = decode(blurred_frame, symbols= [ZBarSymbol.QRCODE, ZBarSymbol.EAN13, ZBarSymbol.UPCA, ZBarSymbol.CODE128])
     
-    # Read the video stream
-    success, img = cap.read()
-    #print(success)
+    for obj in decoded_objects:
+        # Extract the bounding box coordinates
+        points = obj.polygon # Get the polygon points of the barcode/QR code
+        if len(points) == 4:
+            pts = np.array(points, dtype=np.int32) # Reshape the points array to a NumPy array
+            pts = pts.reshape((-1, 1, 2)) # Reshape the points array to a 3D array
+            # Draw the bounding box
+            cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
+        
+        # Extract and draw the decoded text
+        decoded_text = obj.data.decode('utf-8') # Decode the data byte string to a UTF-8 string
+        x, y, w, h = obj.rect
+        # Draw the text
+        cv2.putText(frame, decoded_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        print(f"Decoded {obj.type}: {decoded_text}")
 
-    if not success:
-        break
-  
-    for code in decode(img):
-        #print(code)
+    return frame
 
-        decoded_data = code.data.decode("utf-8")
+def main():
+    # Select the camera source
+    cam_source = select_camera()
+    
+    # Initialize the video capture object
+    cap = cv2.VideoCapture(cam_source)
+    
+    if not cap.isOpened():
+        print("Error: Could not open camera.")
+        return
+    
+    print("Press 'q' to quit.")
+    
+    try: # Try block to handle exceptions
+        while True:
 
-        rect_pts = code.rect
+            # Capture frame-by-frame
+            ret, frame = cap.read()
+            if not ret:
+                print("Failed to grab frame.")
+                break
+            
+            # Process the frame
+            processed_frame = process_frame(frame)
+            
+            # Display the resulting frame
+            cv2.imshow('Barcode/QR Code Scanner', processed_frame)
+            
+            # Exit on 'q' key press
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Release the capture and destroy all windows
+        cap.release()
+        cv2.destroyAllWindows()
 
-        if decoded_data:
-            pts = np.array(code.polygon)
-            cv2.polylines(img, [pts], True, (0, 255, 0), 3)
-            cv2.putText(img, str(decoded_data), (rect_pts[0], rect_pts[1]), 
-                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
-
-
-    cv2.imshow("Video Stream", img)
-    if cv2.waitKey(1) == ord("q"):
-        break
-
-cap.release()
+if __name__ == "__main__": # Check if the script is being run directly
+    main()
