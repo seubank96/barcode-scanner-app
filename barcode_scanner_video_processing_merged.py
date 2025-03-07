@@ -1,3 +1,4 @@
+# Barcode/QR code detection in video feed or file using OpenCV and pyzbar
 import cv2
 import numpy as np
 from pyzbar.pyzbar import decode, ZBarSymbol
@@ -89,4 +90,4 @@ else:
     # Release resources
     cap.release()
     cv2.destroyAllWindows()
-    print(f"Processing completed. Total barcode-detected frames: {barcode_detected_count}")
+    print(f"Processing completed. Total barcode-detected frames: {barcode_detected_count, decoded_text}")
