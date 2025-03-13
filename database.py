@@ -102,8 +102,8 @@ def search_product(productID):
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM inventory WHERE productID = ?", (productID,))
-    result = cursor.fetchone()
+    cursor.execute("SELECT * FROM inventory WHERE productID = ?", (productID,)) 
+    result = cursor.fetchone() 
 
     conn.close()
     return result # returns product info instead of printing it
