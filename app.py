@@ -2,7 +2,7 @@
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import os
-from app_barcode_scanner_video_processing import processing_video
+from app_barcode_scanner_video_processing import process_video
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -28,7 +28,7 @@ def upload_video():
     file.save(file_path)
 
     #process the video
-    barcodes = processing_video(file_path)
+    barcodes = process_video(file_path)
     
     return jsonify({"barcodes":barcodes}), 200
 
