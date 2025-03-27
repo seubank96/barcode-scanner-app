@@ -12,7 +12,7 @@ initialize_database()
 recently_scanned = {}
 
 # Time threshold to prevent duplicate scans (in seconds)
-SCAN_RESET_TIME = 3  # You can adjust this
+SCAN_RESET_TIME = 5  # You can adjust this
 
 # Define barcode/QR code detection function
 def process_frame(frame):
@@ -30,7 +30,7 @@ def process_frame(frame):
     )
 
     for obj in decoded_objects:
-        decoded_text = obj.data.decode('utf-8')
+        decoded_text = obj.data.decode('utf-8') # Decode barcode data
 
         # Ensure barcode is processed only once per frame
         if decoded_text not in processed_barcodes:
@@ -53,21 +53,21 @@ def process_frame(frame):
             print(f"Scanned: {decoded_text}")
 
             # Prevent duplicate updates within the reset time
-            current_time = time.time()
-            if decoded_text in recently_scanned and (current_time - recently_scanned[decoded_text]) < SCAN_RESET_TIME:
+            current_time = time.time() # Get current time
+            if decoded_text in recently_scanned and (current_time - recently_scanned[decoded_text]) < SCAN_RESET_TIME: # Check if barcode was recently scanned
                 print(f"Skipping duplicate scan for {decoded_text}")
                 continue  
 
-            recently_scanned[decoded_text] = current_time  
+            recently_scanned[decoded_text] = current_time  # Update the scanned barcode with current time
 
             # Check if the barcode exists in the database
             product = search_product(decoded_text)
 
             if product:
-                update_quantity(decoded_text, 1)  
+                update_quantity(decoded_text, 1)  # Increment quantity by 1
                 print(f"Updated inventory for Product ID {decoded_text}")
 
-            else:
+            else: # If product not found, add new product to the database
                 print(f"Product {decoded_text} not found in inventory.")
                 category = input("Enter category: ")
                 name = input("Enter product name: ")
@@ -75,7 +75,7 @@ def process_frame(frame):
                 quantity = int(input("Enter quantity: "))
                 return_period = int(input("Enter return period (days): "))
 
-                add_product(category, decoded_text, name, price, quantity, return_period)
+                add_product(category, decoded_text, name, price, quantity, return_period) # Add new product
                 print(f"Added new product: {name} (ID: {decoded_text})")
 
     return frame, detected, detected_barcodes  
@@ -104,28 +104,28 @@ else:
 
     detected_barcodes_across_frames = set()  
 
-    while cap.isOpened():
+    while cap.isOpened(): # Loop through video frames
         ret, frame = cap.read()
         if not ret:
             break  
 
-        processed_frame, detected, detected_barcodes = process_frame(frame)
+        processed_frame, detected, detected_barcodes = process_frame(frame) # Process the frame
 
-        for barcode_text in detected_barcodes:
+        for barcode_text in detected_barcodes: # Save detected barcodes to a set
             if barcode_text not in detected_barcodes_across_frames:
-                detected_barcodes_across_frames.add(barcode_text)
+                detected_barcodes_across_frames.add(barcode_text) # Add new barcode to the set
                 barcode_detected_count += 1
-                frame_filename = os.path.join(output_folder, f"detected_{frame_idx:04d}.png")
+                frame_filename = os.path.join(output_folder, f"detected_{frame_idx:04d}.png") # Save the frame
                 cv2.imwrite(frame_filename, processed_frame)
                 print(f"Saved barcode-detected frame: {frame_filename}")
 
         if choice == '0':
-            cv2.imshow('Live Barcode Scanner', processed_frame)
+            cv2.imshow('Live Barcode Scanner', processed_frame) # Display the frame
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):  
+            key = cv2.waitKey(1) & 0xFF # Wait for key press
+            if key == ord('q'):  # Press 'q' to quit
                 break  
-            if key == ord('r'):  
+            if key == ord('r'):   # Press 'r' to reset the scan
                 recently_scanned.clear()  
                 print("Scan reset! You can now scan the same barcode again.")
 
