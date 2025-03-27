@@ -2,7 +2,7 @@
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import os
-from app_barcode_scanner_video_processing import process_video
+from Barcode_Scanner_Video_Processing.app_barcode_scanner_video_processing import process_video
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
