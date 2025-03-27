@@ -47,7 +47,8 @@ def process_video(video_path): #Modified to return barcode results
     cap = cv2.VideoCapture(video_path) 
     frame_idx = 0 #For saving frames
     barcode_results = []
-
+    seen_barcodes = set() #For duplication
+ 
     while cap.isOpened(): #Loop through video frames
         ret, frame = cap.read() 
         if not ret: 
@@ -56,12 +57,27 @@ def process_video(video_path): #Modified to return barcode results
         processed_frame, detected, detected_barcodes = process_frame(frame) 
 
         if detected:
-            barcode_results.extend(detected_barcodes) #Save detected barcodes
+            for barcode in detected_barcodes:
+                barcode_text = barcode["data"]
+                if barcode_text not in seen_barcodes:
+                    seen_barcodes.add(barcode_text)  # Store unique barcodes
+                    barcode_results.append(barcode)  # Save detected barcodes
             
             #Save frames with detected barcodes
             frame_filename = os.path.join(DETECTED_FRAMES_FOLDER, f"detected_{frame_idx:04d}.png")
             cv2.imwrite(frame_filename, processed_frame)
+
         frame_idx += 1
 
     cap.release()
     return barcode_results
+
+
+
+video_path = "/Users/Camis/Desktop/test.MOV"  # Change this to your actual test file path
+barcode_data = process_video(video_path)
+
+if barcode_data:
+    print("Barcodes detected:", barcode_data)
+else:
+    print("No barcodes found in the video.")
