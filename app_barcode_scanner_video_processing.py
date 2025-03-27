@@ -43,20 +43,20 @@ def process_frame(frame):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
     return frame, detected, detected_barcodes
 
-def process_video(video_path):
-    cap = cv2.VideoCapture(video_path)
+def process_video(video_path): #Modified to return barcode results
+    cap = cv2.VideoCapture(video_path) 
     frame_idx = 0 #For saving frames
     barcode_results = []
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
+    while cap.isOpened(): #Loop through video frames
+        ret, frame = cap.read() 
+        if not ret: 
             break
 
-        processed_frame, detected, detected_barcodes = process_frame(frame)
+        processed_frame, detected, detected_barcodes = process_frame(frame) 
 
         if detected:
-            barcode_results.extend(detected_barcodes)
+            barcode_results.extend(detected_barcodes) #Save detected barcodes
             
             #Save frames with detected barcodes
             frame_filename = os.path.join(DETECTED_FRAMES_FOLDER, f"detected_{frame_idx:04d}.png")
