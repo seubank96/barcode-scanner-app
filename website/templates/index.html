@@ -4,14 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Barcode Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel = "stylesheet" href = "style.css">
 </head>
-<body>
-    <h1>Video Barcode Scanner</h1>
-    <input type="file" id="file" accept="video/*" />
-    <button onclick = "uploadVideo()">Upload</button>
 
-    <h2>Detected Barcodes</h2>
-    <pre id = "results"></pre>
+
+
+<body>
+    <header>
+        <div class="header">
+            <h1>Video Barcode Scanner</h1>
+            <p>Upload a video file to scan for barcodes.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class = "upload-section" >
+            <h2>Upload Video</h2>
+            <p>Scan barcodes from any video file quickly and accurately</p>
+
+            <div class="upload-area">
+                <label for="file" class="file-label">Choose a video file</label>
+                <input type="file" id="file" accept="video/*" />
+                <p>or drag and drop file here</p>
+            </div>
+
+            <p>Supported formats: MP4, AVI, MOV</p>
+            <button onclick="uploadVideo()">Upload</button>
+        </section>
+
+        <section class="results-section">
+            <h2>Results</h2>
+            <p>Detected barcodes will be displayed here.</p>
+            <div class="stats-box">
+                <div class="stat-item">
+                    <h3>Statistics</h3>
+                    <div class="stat-value" id="total-barcodes">0</div>
+                    <div class="stat-label">Barcodes Found</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="unique-barcodes">0</div>
+                    <div class="stat-label">Unique Codes</div>
+                </div>
+            </div>
+
+            <pre id="results">No results yet. Upload a video to scan for barcodes.</pre>
+        </section>
+
+        <div class="footer">
+            <p>&copy; 2025 Video Barcode Scanner. All rights reserved. College of Charleston Drone Lab</p>
+        </div>
+
+    </main>
 
     <h3>HTML VERSION</h3>
 
@@ -23,22 +67,63 @@
                 return;
             }
 
+            // Validate file size and type
+            if (videoFile.size > 100 * 1024 * 1024) { // 100 MB limit
+                alert("File size exceeds 100 MB. Please select a smaller file.");
+                return;
+            }
+
+            // Update UI to show loading state
+            document.getElementById("results").textContent = "Scanning video... Please wait.";
+
+            // Create a FormData object to send the video file
             let formData = new FormData();
             formData.append("video", videoFile);
 
+            // Send the video file to the server
+            // Use the fetch API to send the video file to the server
             try {
                 let response = await fetch("http://127.0.0.1:5000/upload", {
                     method: "POST",
                     body: formData
                 });
 
+                // Check if the response is ok
                 let data = await response.json();
+                // Update the UI with the results
                 document.getElementById("results").textContent = JSON.stringify(data, null, 2);
+
+                // Update stats (example - you'll need to adjust based on your actual API response)
+                if (data.barcodes) {
+                    document.getElementById("total-barcodes").textContent = data.barcodes.length;
+                    const uniqueCodes = new Set(data.barcodes.map(b => b.code));
+                    document.getElementById("unique-barcodes").textContent = uniqueCodes.size;
+                }
+
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById("results").textContent = "Error uploading video.";
             }
         }
+
+        // Add drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById("file").files = files;
+                document.getElementById("file").dispatchEvent(new Event('change'));
+            }
+        });
 
 
     </script>
