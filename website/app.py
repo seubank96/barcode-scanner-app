@@ -3,7 +3,7 @@
 from flask import *
 from werkzeug.utils import secure_filename
 import os
-from website.app_barcode_scanner_video_processing import process_video
+from app_barcode_scanner_video_processing import process_video
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -13,13 +13,13 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-@app.route('/')
+'''@app.route('/')
 def index():
     return redirect(url_for('home'))
 
 @app.route("/home.html")
 def home():
-    return render_template('home.html')  # Render the HTML form
+    return render_template('home.html')  # Render the HTML form'''
 
 # Route to upload a video file
 @app.route("/upload", methods=["POST"])
@@ -40,6 +40,16 @@ def upload_video():
     barcodes = process_video(file_path)
     
     return jsonify({"barcodes":barcodes}), 200
+
+@app.route('/')
+def test_upload():
+    return '''
+    <h1>Barcode Scanner Test</h1>
+    <form method=post enctype=multipart/form-data action="/upload">
+      <input type=file name=video accept="video/*">
+      <input type=submit value="Upload Video">
+    </form>
+    '''
 
 #Run the app
 if __name__ == "__main__":
