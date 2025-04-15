@@ -108,7 +108,7 @@ def search_product(productID):
     conn.close()
     return result  # Returns product info instead of printing it
 
-# Function to reset the entire inventory table (optional)
+# Function to reset the entire inventory table
 def reset_inventory():
     conn = connect_db()
     cursor = conn.cursor()
