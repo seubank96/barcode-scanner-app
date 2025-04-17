@@ -42,8 +42,9 @@ def upload_video():
     return jsonify({"barcodes":barcodes}), 200
 
 @app.route('/')
-def test_upload():
-    return '''
+def index():
+    return render_template('index.html')
+'''
     <h1>Barcode Scanner Test</h1>
     <form method=post enctype=multipart/form-data action="/upload">
       <input type=file name=video accept="video/*">

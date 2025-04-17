@@ -74,10 +74,10 @@ def process_video(video_path): #Modified to return barcode results
 
 
 
-video_path = "/Users/Camis/Desktop/test.MOV"  # Change this to your actual test file path
-barcode_data = process_video(video_path)
+# video_path = "/Users/Camis/Desktop/test.MOV"  # Change this to your actual test file path
+# barcode_data = process_video(video_path)
 
-if barcode_data:
-    print("Barcodes detected:", barcode_data)
-else:
-    print("No barcodes found in the video.")
+# if barcode_data:
+#     print("Barcodes detected:", barcode_data)
+# else:
+#     print("No barcodes found in the video.")
