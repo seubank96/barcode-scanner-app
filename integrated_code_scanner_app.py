@@ -115,7 +115,7 @@ def process_video(file_path):
 
 # ==================== FLASK ROUTES ====================
 
-# ✅ NEW: Home route with upload form
+# Home route with upload form
 @app.route("/", methods=["GET"])
 def home():
     return '''
