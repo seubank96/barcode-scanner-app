@@ -3,7 +3,7 @@
 from flask import *
 from werkzeug.utils import secure_filename
 import os
-from app_barcode_scanner_video_processing import process_video
+from barcode_scanner import process_video
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
