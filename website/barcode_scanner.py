@@ -6,14 +6,16 @@ import time
 from database_website import search_product, add_product, update_quantity, initialize_database  # Import database functions
 
 initialize_database()  # Automatically initialize the database when script runs
-recently_scanned = {}  # Store recently scanned barcodes with timestamps
-SCAN_RESET_TIME = 5  # Threshold to prevent duplicate scans (in seconds)
 
-# Barcode/QR code detection function for image frames
+# Time threshold to prevent duplicate scans (in seconds)
+SCAN_RESET_TIME = 5  
+recently_scanned = {}  # Store recently scanned barcodes with timestamps
+
+# Barcode/QR code detection function for image frames (no DB logic here!)
 def process_frame(frame):
     detected = False
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    blurred_frame = cv2.GaussianBlur(gray_frame, (5, 5), 0)
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale for better detection
+    blurred_frame = cv2.GaussianBlur( gray_frame, (5, 5), 0) # Blur to help detection
 
     processed_barcodes = set()
     detected_barcodes = []
@@ -41,30 +43,6 @@ def process_frame(frame):
             cv2.putText(frame, f"{obj.type}: {decoded_text}", (x, y - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            print(f"Scanned: {decoded_text}")
-
-            current_time = time.time()
-            if decoded_text in recently_scanned and (current_time - recently_scanned[decoded_text]) < SCAN_RESET_TIME:
-                print(f"Skipping duplicate scan for {decoded_text}")
-                continue
-
-            recently_scanned[decoded_text] = current_time
-
-            product = search_product(decoded_text)
-            if product:
-                update_quantity(decoded_text, 1)
-                print(f"Updated inventory for Product ID {decoded_text}")
-            else:
-                print(f"Product {decoded_text} not found in inventory.")
-                category = input("Enter category: ")
-                name = input("Enter product name: ")
-                price = float(input("Enter price: "))
-                quantity = int(input("Enter quantity: "))
-                return_period = int(input("Enter return period (days): "))
-
-                add_product(category, decoded_text, name, price, quantity, return_period)
-                print(f"Added new product: {name} (ID: {decoded_text})")
-
     return frame, detected, detected_barcodes
 
 # Function to process uploaded video files
@@ -86,11 +64,39 @@ def process_video(file_path):
         if not ret:
             break
 
+        if frame_idx % 2 != 0:
+            frame_idx += 1
+            continue  # Process every second frame to reduce processing load
+
         processed_frame, detected, detected_barcodes = process_frame(frame)
 
         for barcode_text in detected_barcodes:
             if barcode_text not in detected_barcodes_across_frames:
                 detected_barcodes_across_frames.add(barcode_text)
+
+                # Prevent frequent re-scanning during video
+                current_time = time.time()
+                if barcode_text in recently_scanned and (current_time - recently_scanned[barcode_text]) < SCAN_RESET_TIME:
+                    print(f"Skipping duplicate barcode: {barcode_text}")
+                    continue
+                recently_scanned[barcode_text] = current_time
+
+                # Only update once per barcode per video
+                product = search_product(barcode_text)
+                if product:
+                    update_quantity(barcode_text, 1)
+                    print(f"Updated inventory for: {barcode_text}")
+                else:
+                    print(f"Product {barcode_text} not found in database.")
+                    category = input("Enter category: ")
+                    name = input("Enter product name: ")
+                    price = float(input("Enter price: "))
+                    quantity = int(input("Enter quantity: "))
+                    return_period = int(input("Enter return period (days): "))
+                    add_product(category, barcode_text, name, price, quantity, return_period)
+                    print(f"Added new product: {name} (ID: {barcode_text})")
+
+                #  Save detected frame
                 barcode_detected_count += 1
                 frame_filename = os.path.join(output_folder, f"detected_{frame_idx:04d}.png")
                 cv2.imwrite(frame_filename, processed_frame)

@@ -21,7 +21,7 @@ def index():
 def home():
     return render_template('home.html')  # Render the HTML form'''
 
-# Route to upload a video file
+# === FLASK ROUTE FOR WEB UPLOAD ===
 @app.route("/upload", methods=["POST"])
 def upload_video():
     if "video" not in request.files:

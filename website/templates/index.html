@@ -96,7 +96,7 @@
                 // Update stats (example - you'll need to adjust based on your actual API response)
                 if (data.barcodes) {
                     document.getElementById("total-barcodes").textContent = data.barcodes.length;
-                    const uniqueCodes = new Set(data.barcodes.map(b => b.data));
+                    const uniqueCodes = new Set(data.barcodes);
                     document.getElementById("unique-barcodes").textContent = uniqueCodes.size;
                 }
 
