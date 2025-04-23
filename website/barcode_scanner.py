@@ -17,21 +17,21 @@ def process_frame(frame):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale for better detection
     blurred_frame = cv2.GaussianBlur( gray_frame, (5, 5), 0) # Blur to help detection
 
-    processed_barcodes = set()
-    detected_barcodes = []
+    processed_barcodes = set() # Track processed barcodes in this frame
+    detected_barcodes = [] # List to return detected barcodes
 
     decoded_objects = decode(
         blurred_frame,
         symbols=[ZBarSymbol.QRCODE, ZBarSymbol.EAN13, ZBarSymbol.UPCA, ZBarSymbol.CODE128]
-    )
+    ) # Detect barcodes and QR codes
 
     for obj in decoded_objects:
-        decoded_text = obj.data.decode('utf-8')
-
+        decoded_text = obj.data.decode('utf-8').strip().replace('/n', '').replace('/r','') # Decode barcode data and clean it
+        # Ensure barcode is processed only once per frame
         if decoded_text not in processed_barcodes:
             detected = True
-            processed_barcodes.add(decoded_text)
-            detected_barcodes.append(decoded_text)
+            processed_barcodes.add(decoded_text) # Add to processed barcodes set
+            detected_barcodes.append(decoded_text) # Add to detected barcodes list
 
             # Draw bounding box
             points = obj.polygon
@@ -39,9 +39,9 @@ def process_frame(frame):
                 pts = np.array(points, dtype=np.int32).reshape((-1, 1, 2))
                 cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
 
-            x, y, w, h = obj.rect
+            x, y, w, h = obj.rect # Get bounding box coordinates
             cv2.putText(frame, f"{obj.type}: {decoded_text}", (x, y - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2) # Display text above barcode
 
     return frame, detected, detected_barcodes
 
@@ -52,14 +52,14 @@ def process_video(file_path):
         print("Error: Could not open video file.")
         return []
 
-    output_folder = os.path.join(os.getcwd(), "detected_frames")
-    os.makedirs(output_folder, exist_ok=True)
+    output_folder = os.path.join(os.getcwd(), "detected_frames") # Folder to save detected frames
+    os.makedirs(output_folder, exist_ok=True)   # Create folder if it doesn't exist
 
     frame_idx = 0
     barcode_detected_count = 0
-    detected_barcodes_across_frames = set()
+    detected_barcodes_across_frames = set()  # Set to track unique barcodes across frames
 
-    while cap.isOpened():
+    while cap.isOpened(): # Read video frame by frame
         ret, frame = cap.read()
         if not ret:
             break
@@ -94,7 +94,7 @@ def process_video(file_path):
                     quantity = int(input("Enter quantity: "))
                     return_period = int(input("Enter return period (days): "))
                     add_product(category, barcode_text, name, price, quantity, return_period)
-                    print(f"Added new product: {name} (ID: {barcode_text})")
+                    print(f"Added new product: {name} (ID: {barcode_text})")   
 
                 #  Save detected frame
                 barcode_detected_count += 1
@@ -104,6 +104,6 @@ def process_video(file_path):
 
         frame_idx += 1
 
-    cap.release()
-    print(f"Video processing complete. {barcode_detected_count} unique barcodes detected.")
-    return list(detected_barcodes_across_frames)
+    cap.release() # Release video capture object
+    print(f"Video processing complete. {barcode_detected_count} unique barcodes detected.") 
+    return list(detected_barcodes_across_frames) # Return list of detected barcodes
